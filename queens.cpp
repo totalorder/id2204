@@ -89,41 +89,28 @@ public:
 
     // Create constraints saying the sum of all values in each diagonal
     // should be at most 1
-    for (int diagonalIndex = 0; diagonalIndex < size * 2; diagonalIndex++) {
+    for (int diagonalIndex = -size+1; diagonalIndex < size; diagonalIndex++) {
       // First half the start point moves up along the 0th column
-      int colIdx = 0;
-      int rowIdx = size - 1 - diagonalIndex;
-      int steps = diagonalIndex + 1;
+      int colIdx = std::max(diagonalIndex, 0);
+      int rowIdx = std::max(-diagonalIndex, 0);
+      int steps = size - 1 - std::abs(diagonalIndex);
 
-      // Second half the start point moves right along the 0th row
-      if (diagonalIndex >= size) {
-        colIdx = diagonalIndex - size;
-        rowIdx = 0;
-        steps = size - colIdx;
+      // Create linear expressions which are the sum of all cells
+      // in each diagonal
+      LinIntExpr sumOfDownDiagonal;
+      LinIntExpr sumOfUpDiagonal;
+      for (int idx = 0; idx <= steps; idx++) {
+        // Going right-down of the start point
+        IntVar downCellValue = matrix(colIdx + idx, rowIdx + idx);
+        sumOfDownDiagonal = idx != 0 ? sumOfDownDiagonal + downCellValue : downCellValue;
+
+        // Going right-up of the start point with inverted row
+        IntVar upCellValue = matrix(colIdx + idx, size - 1 - (rowIdx + idx));
+        sumOfUpDiagonal = idx != 0 ? sumOfUpDiagonal + upCellValue : upCellValue;
       }
 
-      // Create a linear expression which is the sum of all cells
-      // in the diagonal going right-down of the start point
-      LinIntExpr sumOfDownDiagonal = matrix(colIdx + 0, rowIdx + 0);
-      for (int idx = 1; idx < steps; idx++) {
-        IntVar cellValue = matrix(colIdx + idx, rowIdx + idx);
-        sumOfDownDiagonal = sumOfDownDiagonal + cellValue;
-      }
-
-      // Apply the constraint of the sum of the diagonal being at most 1
+      // Each diagonal can have a sum of at most 1
       rel(*this, sumOfDownDiagonal <= 1);
-
-      // Create a linear expression which is the sum of all cells
-      // in the diagonal going right-up of the start point
-      // Start at top 0th row, moving down
-      rowIdx = size - 1 - rowIdx;
-      LinIntExpr sumOfUpDiagonal = matrix(colIdx + 0, rowIdx + 0);
-      for (int idx = 1; idx < steps; idx++) {
-        IntVar cellValue = matrix(colIdx + idx, rowIdx - idx);
-        sumOfUpDiagonal = sumOfUpDiagonal + cellValue;
-      }
-
-      // Apply the constraint of the sum of the diagonal being at most 1
       rel(*this, sumOfUpDiagonal <= 1);
     }
 
@@ -226,8 +213,8 @@ public:
 int
 main(int argc, char* argv[]) {
   SizeOptions opt("Queens");
-//  opt.iterations(5000);
-  opt.size(8);
+  opt.iterations(500);
+  opt.size(7);
   opt.propagation(Queens::PROP_DISTINCT);
   opt.propagation(Queens::PROP_BINARY, "binary",
                       "only binary disequality constraints");
