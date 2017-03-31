@@ -59,68 +59,98 @@ using namespace Gecode;
  */
 class Queens : public Script {
 public:
-  /// Position of queens on boards
-  IntVarArray q;
+  int size;
+  IntVarArray matrixData;
   /// Propagation to use for model
   enum {
     PROP_BINARY,  ///< Use only binary disequality constraints
     PROP_MIXED,   ///< Use single distinct and binary disequality constraints
     PROP_DISTINCT ///< Use three distinct constraints
   };
-  /// The actual problem
+
   Queens(const SizeOptions& opt)
-    : Script(opt), q(*this,opt.size(),0,opt.size()-1) {
-    const int n = q.size();
+    : Script(opt),
+      // Initialize to size 9*9, one for each cell in on the board,
+      // with values in range 0-1
+      matrixData(*this, opt.size()*opt.size(), 0, 1),
+      size(opt.size()) {
+    const int size = opt.size();
 
-//    std::cout << "opt.propagation(): " << opt.propagation() << std::endl;
+    // Create a matrix representing the board, backed by matrixData
+    // of size*size
+    Matrix<IntVarArray> matrix(matrixData, size, size);
 
-    switch (opt.propagation()) {
-    case PROP_BINARY:
-      for (int i = 0; i<n; i++)
-        for (int j = i+1; j<n; j++) {
-          rel(*this, q[i] != q[j]);
-          rel(*this, q[i]+i != q[j]+j);
-          rel(*this, q[i]-i != q[j]-j);
-        }
-      break;
-    case PROP_MIXED:
-      for (int i = 0; i<n; i++)
-        for (int j = i+1; j<n; j++) {
-          rel(*this, q[i]+i != q[j]+j);
-          rel(*this, q[i]-i != q[j]-j);
-        }
-      distinct(*this, q, opt.ipl());
-      break;
-    case PROP_DISTINCT:
-      distinct(*this, IntArgs::create(n,0,1), q, opt.ipl());
-      distinct(*this, IntArgs::create(n,0,-1), q, opt.ipl());
-      distinct(*this, q, opt.ipl());
-      break;
+    // Create constraints saying the sum of all values in each
+    // row and column should be 1
+    for (int rowIdx = 0; rowIdx < size; rowIdx++) {
+      rel(*this, sum(matrix.row(rowIdx)) == 1);
+      rel(*this, sum(matrix.col(rowIdx)) == 1);
     }
-    branch(*this, q, INT_VAR_SIZE_MIN(), INT_VAL_MIN());
+
+    // Create constraints saying the sum of all values in each diagonal
+    // should be at most 1
+    for (int diagonalIndex = 0; diagonalIndex < size * 2; diagonalIndex++) {
+      // First half the start point moves up along the 0th column
+      int colIdx = 0;
+      int rowIdx = size - 1 - diagonalIndex;
+      int steps = diagonalIndex + 1;
+
+      // Second half the start point moves right along the 0th row
+      if (diagonalIndex >= size) {
+        colIdx = diagonalIndex - size;
+        rowIdx = 0;
+        steps = size - colIdx;
+      }
+
+      // Create a linear expression which is the sum of all cells
+      // in the diagonal going right-down of the start point
+      LinIntExpr sumOfDownDiagonal = matrix(colIdx + 0, rowIdx + 0);
+      for (int idx = 1; idx < steps; idx++) {
+        IntVar cellValue = matrix(colIdx + idx, rowIdx + idx);
+        sumOfDownDiagonal = sumOfDownDiagonal + cellValue;
+      }
+
+      // Apply the constraint of the sum of the diagonal being at most 1
+      rel(*this, sumOfDownDiagonal <= 1);
+
+      // Create a linear expression which is the sum of all cells
+      // in the diagonal going right-up of the start point
+      // Start at top 0th row, moving down
+      rowIdx = size - 1 - rowIdx;
+      LinIntExpr sumOfUpDiagonal = matrix(colIdx + 0, rowIdx + 0);
+      for (int idx = 1; idx < steps; idx++) {
+        IntVar cellValue = matrix(colIdx + idx, rowIdx - idx);
+        sumOfUpDiagonal = sumOfUpDiagonal + cellValue;
+      }
+
+      // Apply the constraint of the sum of the diagonal being at most 1
+      rel(*this, sumOfUpDiagonal <= 1);
+    }
+
+    branch(*this, matrixData, INT_VAR_SIZE_MAX(), INT_VAL_MAX());
   }
 
   /// Constructor for cloning \a s
-  Queens(bool share, Queens& s) : Script(share,s) {
-    q.update(*this, share, s.q);
+  Queens(bool share, Queens& s, int size) : Script(share,s), size(size) {
+    matrixData.update(*this, share, s.matrixData);
   }
 
   /// Perform copying during cloning
   virtual Space*
   copy(bool share) {
-    return new Queens(share,*this);
+    return new Queens(share, *this, size);
   }
 
   /// Print solution
   virtual void
   print(std::ostream& os) const {
-    os << "queens\t";
-    for (int i = 0; i < q.size(); i++) {
-      os << q[i] << ", ";
-      if ((i+1) % 10 == 0)
-        os << std::endl << "\t";
+    for (int rowIdx = 0; rowIdx < size; rowIdx++) {
+      for (int colIdx = 0; colIdx < size; colIdx++) {
+        IntVar cellValue = matrixData[colIdx + rowIdx * size];
+        os << cellValue << " ";
+      }
+      os << std::endl;
     }
-    os << std::endl;
   }
 };
 
@@ -149,13 +179,13 @@ public:
       delete i;
     }
 
-    for (int i=0; i<q.q.size(); i++) {
-      for (int j=0; j<q.q.size(); j++) {
+    for (int i=0; i<q.matrixData.size(); i++) {
+      for (int j=0; j<q.matrixData.size(); j++) {
         scene->addRect(i*unit,j*unit,unit,unit);
       }
-      QBrush b(q.q[i].assigned() ? Qt::black : Qt::red);
-      QPen p(q.q[i].assigned() ? Qt::black : Qt::white);
-      for (IntVarValues xv(q.q[i]); xv(); ++xv) {
+      QBrush b(q.matrixData[i].assigned() ? Qt::black : Qt::red);
+      QPen p(q.matrixData[i].assigned() ? Qt::black : Qt::white);
+      for (IntVarValues xv(q.matrixData[i]); xv(); ++xv) {
         scene->addEllipse(QRectF(i*unit+unit/4,xv.val()*unit+unit/4,
                                  unit/2,unit/2), p, b);
       }
@@ -196,7 +226,7 @@ public:
 int
 main(int argc, char* argv[]) {
   SizeOptions opt("Queens");
-  opt.iterations(500);
+//  opt.iterations(5000);
   opt.size(8);
   opt.propagation(Queens::PROP_DISTINCT);
   opt.propagation(Queens::PROP_BINARY, "binary",
