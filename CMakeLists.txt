@@ -3,13 +3,19 @@ project(id2204)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES sudoku.cpp)
+# sudo apt-get install libqt4-dev
+find_package(Qt4 REQUIRED QtGui)
 
-add_executable(id2204 ${SOURCE_FILES})
+set(SODOKU_SOURCE_FILES sudoku.cpp)
+set(QUEENS_SOURCE_FILES queens.cpp)
+
+add_executable(sudoku ${SODOKU_SOURCE_FILES})
+add_executable(queens ${QUEENS_SOURCE_FILES})
 
 set(GECODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../gecode-5.0.0)
 include_directories(${GECODE_DIR})
-target_link_libraries(id2204
+
+set(LIBRARIES
         ${GECODE_DIR}/libgecodedriver.so
         ${GECODE_DIR}/libgecodeflatzinc.so
         ${GECODE_DIR}/libgecodefloat.so
@@ -19,4 +25,7 @@ target_link_libraries(id2204
         ${GECODE_DIR}/libgecodeminimodel.so
         ${GECODE_DIR}/libgecodesearch.so
         ${GECODE_DIR}/libgecodeset.so
-        ${GECODE_DIR}/libgecodesupport.so)
+        ${GECODE_DIR}/libgecodesupport.so
+        Qt4::QtGui)
+target_link_libraries(sudoku ${LIBRARIES})
+target_link_libraries(queens ${LIBRARIES})
