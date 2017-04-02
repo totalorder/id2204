@@ -15,33 +15,33 @@ class Sudoku : public Space {
     public:
         Sudoku(int board[9][9]):
                 // Initialize to size 9*9, one for each cell in the puzzle,
-                // with values between 1-9
+                // with values in range 1-9
                 matrixData(*this, 9*9, 1, 9) {
 
             // Create a matrix representing the board, backed by matrixData
             // of size 9x9
-            Matrix<IntVarArray> m(matrixData, 9, 9);
+            Matrix<IntVarArray> matrix(matrixData, 9, 9);
 
             // Unique constraint for each 3x3 square
             // Find the top-left corner of each 3x3 square, and add a distinct constraint
             // on the 3x3 matrix slice starting from there
             for (int rowIdx = 0; rowIdx < 9; rowIdx = rowIdx + 3) {
                 for (int colIdx = 0; colIdx < 9; colIdx = colIdx + 3) {
-                    distinct(*this, m.slice(colIdx, colIdx+3, rowIdx, rowIdx+3));
+                    distinct(*this, matrix.slice(colIdx, colIdx+3, rowIdx, rowIdx+3));
                 }
             }
 
             // Unique constraint for rows, columns + given values equality constraints
             for (int rowIdx = 0; rowIdx < 9; rowIdx++) {
                 // Apply unique constraints for each row and column
-                distinct(*this, m.row(rowIdx));
-                distinct(*this, m.col(rowIdx));
+                distinct(*this, matrix.row(rowIdx));
+                distinct(*this, matrix.col(rowIdx));
 
                 // Apply equality constraints for all given non-zero values in the board
                 for (int colIdx = 0; colIdx < 9; colIdx++) {
                     int cellValue = board[rowIdx][colIdx];
                     if (cellValue != 0) {
-                        rel(*this, m(colIdx, rowIdx), IRT_EQ, cellValue);
+                        rel(*this, matrix(colIdx, rowIdx), IRT_EQ, cellValue);
                     }
                 }
             }
