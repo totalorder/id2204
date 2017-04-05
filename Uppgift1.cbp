@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6"/>
 	<Project>
-		<Option title="id2204"/>
+		<Option title="Uppgift1"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
 		<Option virtualFolders="CMake Files\;"/>
@@ -89,6 +89,68 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="sudokusloppy">
+				<Option output="/home/heimlen/Documents/id2204/sudokusloppy" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/heimlen/Documents/id2204"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DQT_GUI_LIB"/>
+					<Add option="-DQT_CORE_LIB"/>
+					<Add option="-DQT_NO_DEBUG"/>
+					<Add directory="/home/heimlen/Documents/id2204/../gecode-5.0.0"/>
+					<Add directory="/usr/include/qt4/QtGui"/>
+					<Add directory="/usr/include/qt4/QtCore"/>
+					<Add directory="/usr/share/qt4/mkspecs/default"/>
+					<Add directory="/usr/include/qt4"/>
+					<Add directory="/usr/include/c++/6"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/6"/>
+					<Add directory="/usr/include/c++/6/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 sudokusloppy"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="sudokusloppy/fast">
+				<Option output="/home/heimlen/Documents/id2204/sudokusloppy" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/heimlen/Documents/id2204"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DQT_GUI_LIB"/>
+					<Add option="-DQT_CORE_LIB"/>
+					<Add option="-DQT_NO_DEBUG"/>
+					<Add directory="/home/heimlen/Documents/id2204/../gecode-5.0.0"/>
+					<Add directory="/usr/include/qt4/QtGui"/>
+					<Add directory="/usr/include/qt4/QtCore"/>
+					<Add directory="/usr/share/qt4/mkspecs/default"/>
+					<Add directory="/usr/include/qt4"/>
+					<Add directory="/usr/include/c++/6"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/6"/>
+					<Add directory="/usr/include/c++/6/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 sudokusloppy/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/heimlen/Documents/id2204/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 			<Target title="edit_cache">
 				<Option working_dir="/home/heimlen/Documents/id2204"/>
 				<Option type="4"/>
@@ -167,6 +229,9 @@
 		</Unit>
 		<Unit filename="/home/heimlen/Documents/id2204/sudoku.cpp">
 			<Option target="sudoku"/>
+		</Unit>
+		<Unit filename="/home/heimlen/Documents/id2204/sudokusloppy.cpp">
+			<Option target="sudokusloppy"/>
 		</Unit>
 		<Unit filename="/home/heimlen/Documents/id2204/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>

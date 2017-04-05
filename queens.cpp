@@ -117,7 +117,7 @@ public:
     branch(*this, matrixData, INT_VAR_SIZE_MAX(), INT_VAL_MAX());
   }
 
-  /// Constructor for cloning \a s
+  /// Constructor for cloning \a sS
   Queens(bool share, Queens& s, int size) : Script(share,s), size(size) {
     matrixData.update(*this, share, s.matrixData);
   }
@@ -214,7 +214,7 @@ int
 main(int argc, char* argv[]) {
   SizeOptions opt("Queens");
   opt.iterations(500);
-  opt.size(7);
+  opt.size(9);
   opt.propagation(Queens::PROP_DISTINCT);
   opt.propagation(Queens::PROP_BINARY, "binary",
                       "only binary disequality constraints");

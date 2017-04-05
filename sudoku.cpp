@@ -5,6 +5,17 @@ using namespace Gecode;
 
 /*TODO 1. skriva en korrekt namespace med en eventuell metod som tar fram värdet på rätt position i exempel sudokubrädet
   (vet ej om vi egentligen behöver detta)*/
+
+//
+// Help functions for ID2204, Assignment 1, Task 5
+//
+
+/* Sudoku specifications
+ *
+ * Each specification gives the initial positions that are filled in,
+ * with blank squares represented as zeroes.
+ */
+
 namespace {
     static int examples[][9][9] = {
             {
@@ -205,8 +216,6 @@ namespace {
                     {6,8,7, 3,5,1, 4,9,2}
             }
     };
-    int example_size(const char *s);
-    int sudokuField(const char *s, int n, int i, int j);
 }
 
 class Sudoku : public Script {
@@ -223,31 +232,29 @@ public:
     };
 
     //Constructor
-    Sudoku(const SizeOptions& opt) : Sudoku(opt),
+    Sudoku(const SizeOptions& opt) : Script(opt),
                                      matrixData(*this, 9*9, 1, 9) {
-
-        //Create the matrix interface of the array, to make use of .col and .row
-        Matrix<IntVarArray> matrix(matrixData, 9, 9);
+        //Create the m interface of the array, to make use of .col and .row
+        Matrix<IntVarArray> m(matrixData, 9, 9);
 
         // Constraints for rows and columns
         for (int rowIndex = 0; rowIndex < 9; rowIndex++) {
-            distinct(*this, matrix.row(rowIndex), opt.ipl());
-            distinct(*this, matrix.col(rowIndex), opt.ipl());
+            distinct(*this, m.row(rowIndex), opt.ipl());
+            distinct(*this, m.col(rowIndex), opt.ipl());
         }
 
         // Constraints for squares
         for (int rowIndex = 0; rowIndex < 9; rowIndex += 3) {
             for (int colIndex = 0; colIndex < 9; colIndex += 3) {
-                distinct(*this, matrix.slice(rowIndex, rowIndex + 3, colIndex, colIndex + 3), opt.ipl());
+                distinct(*this, m.slice(rowIndex, rowIndex + 3, colIndex, colIndex + 3), opt.ipl());
             }
         }
         //Fill in predefined values
-        //TODO 1. det är alltså här vi behöver titta i exempelbrädet om värdet finns eller är 0.
         for (int rowIndex = 0; rowIndex < 9; ++rowIndex) {
             for (int colIndex = 0; colIndex < 9; ++colIndex) {
-              int cellValue = examples[rowIndex][colIndex];
+              int cellValue = examples[opt.size()][rowIndex][colIndex];
                 if(cellValue != 0) {
-                    rel(*this, matrix(colIndex,rowIndex), IRT_EQ, cellValue);
+                    rel(*this, m(colIndex,rowIndex), IRT_EQ, cellValue);
                 }
             }
         }
@@ -276,7 +283,7 @@ public:
         return new Sudoku(share, *this);
     }
 
-    // Print the solution as a matrix
+ /*   // Print the solution as a matrix
     void print(void) const {
         for (int rowIdx = 0; rowIdx < 9; rowIdx++) {
             bool isHorizontal = (rowIdx + 1) % 3 == 0 && rowIdx < 8;
@@ -296,12 +303,31 @@ public:
                 std::cout << "----------+-----------+------------" << std::endl;
             }
         }
+    }*/
+
+    /// Print solution
+    virtual void
+    print(std::ostream& os) const {
+        os << "  ";
+        for (int i = 0; i<81; i++) {
+            if (matrixData[i].assigned()) {
+                if (matrixData[i].val()<10)
+                    os << matrixData[i] << " ";
+                else
+                    os << (char)(matrixData[i].val()+'A'-10) << " ";
+            }
+            else
+                os << ". ";
+            if((i+1)%(9) == 0)
+                os << std::endl << "  ";
+        }
+        os << std::endl;
     }
 };
 
     int main(int argc, char* argv[]) {
         SizeOptions opt("Sudoku");
-        opt.size(0);
+        opt.size(16);
         opt.ipl(IPL_DOM);
         opt.solutions(0);
         opt.branching(Sudoku::BRANCH_SIZE_AFC);
@@ -321,18 +347,3 @@ public:
             solveBoard(opt, examples[boardIdx]);
         */
         }
-    };
-
-namespace {
-
-    //
-// Help functions for ID2204, Assignment 1, Task 5
-//
-
-/* Sudoku specifications
- *
- * Each specification gives the initial positions that are filled in,
- * with blank squares represented as zeroes.
- */
-
-}
