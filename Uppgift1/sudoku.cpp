@@ -3,19 +3,6 @@
 
 using namespace Gecode;
 
-/*TODO 1. skriva en korrekt namespace med en eventuell metod som tar fram värdet på rätt position i exempel sudokubrädet
-  (vet ej om vi egentligen behöver detta)*/
-
-//
-// Help functions for ID2204, Assignment 1, Task 5
-//
-
-/* Sudoku specifications
- *
- * Each specification gives the initial positions that are filled in,
- * with blank squares represented as zeroes.
- */
-
 namespace {
     static int examples[][9][9] = {
             {
@@ -283,28 +270,6 @@ public:
         return new Sudoku(share, *this);
     }
 
- /*   // Print the solution as a matrix
-    void print(void) const {
-        for (int rowIdx = 0; rowIdx < 9; rowIdx++) {
-            bool isHorizontal = (rowIdx + 1) % 3 == 0 && rowIdx < 8;
-            for (int colIdx = 0; colIdx < 9; colIdx++) {
-                IntVar cellValue = matrixData[colIdx + rowIdx * 9];
-                std::cout << cellValue;
-                bool isVertical = (colIdx + 1) % 3 == 0 && colIdx < 8;
-                if (isVertical) {
-                    std::cout << " | ";
-                } else {
-                    std::cout << "   ";
-                }
-            }
-
-            std::cout << std::endl;
-            if (isHorizontal) {
-                std::cout << "----------+-----------+------------" << std::endl;
-            }
-        }
-    }*/
-
     /// Print solution
     virtual void
     print(std::ostream& os) const {
@@ -327,7 +292,7 @@ public:
 
     int main(int argc, char* argv[]) {
         SizeOptions opt("Sudoku");
-        opt.size(16);
+        opt.size(0);
         opt.ipl(IPL_DOM);
         opt.solutions(0);
         opt.branching(Sudoku::BRANCH_SIZE_AFC);
@@ -338,12 +303,4 @@ public:
         opt.branching(Sudoku::BRANCH_AFC, "afc", "maximum afc");
         opt.parse(argc,argv);
         Script::run<Sudoku,DFS,SizeOptions>(opt);
-        //TODO 2. Eventuellt fixa ett sätt att lösa alla sudoku brädor, vet ej om detta script gör det automatiskt eller inte.
-        //TODO 2. Just nu verkar det som att det bräde som löses är siffran som pekas ut av opt.size() på rad 304.
-        /*int numExamples = sizeof(examples) / sizeof(examples[0]);
-        for (int boardIdx = 0; boardIdx < numExamples; boardIdx++) {
-            std::cout << std::endl;
-            std::cout << "Example idx " << boardIdx << ":" << std::endl;
-            solveBoard(opt, examples[boardIdx]);
-        */
-        }
+    }

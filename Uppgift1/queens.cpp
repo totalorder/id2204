@@ -114,7 +114,7 @@ public:
       rel(*this, sumOfUpDiagonal <= 1);
     }
 
-    branch(*this, matrixData, INT_VAR_SIZE_MAX(), INT_VAL_MAX());
+    branch(*this, matrixData, INT_VAR_SIZE_MAX(), INT_VALUES_MAX());
   }
 
   /// Constructor for cloning \a sS
