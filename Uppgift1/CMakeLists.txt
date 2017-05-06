@@ -14,7 +14,7 @@ add_executable(sudoku ${SUDOKU_SOURCE_FILES})
 add_executable(sudokusloppy ${SUDOKUSLOPPY_SOURCE_FILES})
 add_executable(queens ${QUEENS_SOURCE_FILES})
 
-set(GECODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../gecode-5.0.0)
+set(GECODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../gecode-5.0.0)
 include_directories(${GECODE_DIR})
 
 set(LIBRARIES

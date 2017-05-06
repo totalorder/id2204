@@ -91,7 +91,6 @@ public:
 
   // Perform propagation
   virtual ExecStatus propagate(Space& home, const ModEventDelta&) {
-
     //
     // This is what YOU have to add!
     //

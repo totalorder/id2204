@@ -4,7 +4,7 @@
 
 using namespace Gecode;
 
-const int N = 5;
+const int N = 6;
 
 class Square : public Script {
 protected:
@@ -62,7 +62,7 @@ public:
                 BoolVar squareTopOfOtherSquare(*this, 0, 1);
                 BoolVar otherSquareTopOfSquare(*this, 0, 1);
 //                BoolVar square(*this, 0, 1);
-                // The right edge of square must be left of the left edge of otherSquare 
+                // The right edge of square must be left of the left edge of otherSquare
                 rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]) == squareLeftOfOtherSquare);
 //                rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]));
 
@@ -70,7 +70,7 @@ public:
 //                rel(*this, (xCoords[otherSquare] + size(otherSquare) <= xCoords[square]));
                 rel(*this, (xCoords[otherSquare] + size(otherSquare) <= xCoords[square] == otherSquareLeftOfSquare));
 
-                rel(*this, squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
+//                rel(*this, squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
 
                 // The bottom edge of square  must be above the top edge of otherSquare
 //                rel(*this, (yCoords[square] + size(square) <= yCoords[otherSquare]));
@@ -81,7 +81,7 @@ public:
                 rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square] == otherSquareTopOfSquare));
 
 
-                rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare == 1);
+                rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare + squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
             }
         }
 
@@ -92,35 +92,35 @@ public:
 
         // TODO: Fix the column and row reified propagators described in #3 in instructions
         // Constraint for columns of x coordinates
-//        for (int outer = 0; outer < N; outer++) {
-//            BoolVarArgs reifiedRows(*this, N, 0, 1);
-//            BoolVarArgs reifiedColumns(*this, N, 0, 1);
-//
-//            for (int inner = 0; inner < N; inner++) {
-//                // The x coordinate of all squares must be between
-//                // the column index - size of square + 1 and column index
-//                // xCoords[inner] must be less than outer-(n-inner)+1 and bigger than outer
-//                dom(*this, xCoords[inner], outer - size(inner) + 1, outer, reifiedRows[inner]);
-////                rowsSquareSizes[inner] = xCoords[inner];
-//
-//                // The y coordinate of all squares must be between
-//                // the row index - size of square + 1 and row index
-//                dom(*this, yCoords[inner], outer - size(inner) + 1, outer, reifiedColumns[inner]);
-//            }
-//
-//            // The sum of the sizes of all squares in column must be less or
-//            // equal to the max size of the square
-//            linear(*this, sizesOfSquares, reifiedColumns, IRT_LQ, sizeOfSquare);
-//
-//            // The sum of the sizes of all squares in row must be less or
-//            // equal to the max size of the square
-//            linear(*this, sizesOfSquares, reifiedRows, IRT_LQ, sizeOfSquare);
-//        }
+        for (int outer = 0; outer < N; outer++) {
+            BoolVarArgs reifiedRows(*this, N, 0, 1);
+            BoolVarArgs reifiedColumns(*this, N, 0, 1);
+
+            for (int inner = 0; inner < N; inner++) {
+                // The x coordinate of all squares must be between
+                // the column index - size of square + 1 and column index
+                // xCoords[inner] must be less than outer-(n-inner)+1 and bigger than outer
+                dom(*this, xCoords[inner], outer - size(inner) + 1, outer, reifiedRows[inner]);
+//                rowsSquareSizes[inner] = xCoords[inner];
+
+                // The y coordinate of all squares must be between
+                // the row index - size of square + 1 and row index
+                dom(*this, yCoords[inner], outer - size(inner) + 1, outer, reifiedColumns[inner]);
+            }
+
+            // The sum of the sizes of all squares in column must be less or
+            // equal to the max size of the square
+            linear(*this, sizesOfSquares, reifiedColumns, IRT_LQ, sizeOfSquare);
+
+            // The sum of the sizes of all squares in row must be less or
+            // equal to the max size of the square
+            linear(*this, sizesOfSquares, reifiedRows, IRT_LQ, sizeOfSquare);
+        }
 
         //TODO write a good branching heuristic
-        branch(*this, yCoords, INT_VAR_MIN_MIN(), INT_VAL_MIN());
-        branch(*this, xCoords, INT_VAR_MIN_MIN(), INT_VAL_MIN());
         branch(*this, sizeOfSquare, INT_VAL_MIN());
+        branch(*this, xCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
+        branch(*this, yCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
     }
 
     // Copy constructor
