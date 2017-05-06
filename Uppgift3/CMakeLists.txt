@@ -3,14 +3,20 @@ project(Uppgift3)
 
 set(CMAKE_CXX_STANDARD 11)
 
+<<<<<<< HEAD
 set(SQUARE_SOURCE_FILES square.cpp)
 set(NO-OVERLAP_SOURCE_FILES no-overlap.cpp)
 
 add_executable(square ${SQUARE_SOURCE_FILES})
 add_executable(no-overlap ${NO-OVERLAP_SOURCE_FILES})
 
+=======
+set(SOURCE_FILES square.cpp)
+add_executable(Uppgift3 ${SOURCE_FILES})
+add_executable(Slask slask.cpp)
+>>>>>>> 53512b8837de351d406ba23698d477294b3601f3
 
-set(GECODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Documents/gecode-5.0.0)
+set(GECODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../gecode-5.0.0)
 include_directories(${GECODE_DIR})
 
 set(LIBRARIES
@@ -25,3 +31,6 @@ set(LIBRARIES
         ${GECODE_DIR}/libgecodeset.so
         ${GECODE_DIR}/libgecodesupport.so
         )
+
+
+target_link_libraries(Uppgift3 ${LIBRARIES})
