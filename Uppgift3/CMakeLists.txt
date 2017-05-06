@@ -3,8 +3,12 @@ project(Uppgift3)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES square.cpp)
-add_executable(Uppgift3 ${SOURCE_FILES})
+set(SQUARE_SOURCE_FILES square.cpp)
+set(NO-OVERLAP_SOURCE_FILES no-overlap.cpp)
+
+add_executable(square ${SQUARE_SOURCE_FILES})
+add_executable(no-overlap ${NO-OVERLAP_SOURCE_FILES})
+
 
 set(GECODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Documents/gecode-5.0.0)
 include_directories(${GECODE_DIR})

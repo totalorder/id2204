@@ -4,3 +4,7 @@ Makefile
 cmake_install.cmake
 queens
 sudoku
+*.xml
+*.idea
+Uppgift3/.idea/
+
