@@ -28,7 +28,7 @@ public:
         for (int i = 1; i < n + 1; i++) {
             sumOfSquares += i * i;
         }
-        return std::floor(std::sqrt(sumOfSquares));
+        return (int) std::floor(std::sqrt(sumOfSquares));
     }
 
     int longestSide(int n) {
@@ -49,6 +49,11 @@ public:
             rel(*this, yCoords[i] <= sizeOfSquare - size(i));
             rel(*this, xCoords[i] <= sizeOfSquare - size(i));
         }
+
+        //Symmetry-break constraint for largest square
+//        rel(*this, xCoords[0] <= (1 + std::floor((N - sizeOfSquare.max()) / 2)));
+//        dom(*this, xCoords[0], 1, (int) (1 + std::floor((N - sizeOfSquare.max()) / 2)));
+//        rel(*this, yCoords[0] <= xCoords[0]);
 
         // Constraint for non-overlapping squares.
         for (int square = 0; square < N; square++) {
@@ -119,8 +124,8 @@ public:
 
         //TODO write a good branching heuristic
         branch(*this, sizeOfSquare, INT_VAL_MIN());
-        branch(*this, xCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
-        branch(*this, yCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
+        branch(*this, xCoords, INT_VAR_MIN_MIN(), INT_VAL_MIN());
+        branch(*this, yCoords, INT_VAR_MIN_MIN(), INT_VAL_MAX());
     }
 
     // Copy constructor

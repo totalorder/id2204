@@ -94,7 +94,14 @@ public:
     //
     // This is what YOU have to add!
     //
-
+      for (int i = 0; i < x.size(); i++) {
+        for (int j = i + 1; j < x.size(); j++) {
+          GECODE_ME_CHECK(x[i].val() + w[i] <= x[j].val());
+          GECODE_ME_CHECK(x[j].val() + w[j] <= x[i].val());
+          GECODE_ME_CHECK(y[i].val() + h[i] <= y[j].val());
+          GECODE_ME_CHECK(y[j].val() + h[j] <= y[i].val());
+        }
+      }
   }
 
   // Dispose propagator and return its size
