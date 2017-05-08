@@ -51,9 +51,8 @@ public:
         }
 
         //Symmetry-break constraint for largest square
-//        rel(*this, xCoords[0] <= (1 + std::floor((N - sizeOfSquare.max()) / 2)));
-//        dom(*this, xCoords[0], 1, (int) (1 + std::floor((N - sizeOfSquare.max()) / 2)));
-//        rel(*this, yCoords[0] <= xCoords[0]);
+        dom(*this, xCoords[0], 0, (int) (1 + std::floor((sizeOfSquare.max() -  size(0)) / 2)));
+        rel(*this, yCoords[0] <= xCoords[0]);
 
         // Constraint for non-overlapping squares.
         for (int square = 0; square < N; square++) {
@@ -113,19 +112,17 @@ public:
                 dom(*this, yCoords[inner], outer - size(inner) + 1, outer, reifiedColumns[inner]);
             }
 
-            // The sum of the sizes of all squares in column must be less or
-            // equal to the max size of the square
+            //the sum of the products of sizesOfSquares[i] and reifiedColumns[i] must be less than or equal to the size of the enclosing square.
             linear(*this, sizesOfSquares, reifiedColumns, IRT_LQ, sizeOfSquare);
 
-            // The sum of the sizes of all squares in row must be less or
-            // equal to the max size of the square
+            //the sum of the products of sizesOfSquares[i] and reifiedRows[i] must be less than or equal to the size of the enclosing square.
             linear(*this, sizesOfSquares, reifiedRows, IRT_LQ, sizeOfSquare);
         }
 
         //TODO write a good branching heuristic
         branch(*this, sizeOfSquare, INT_VAL_MIN());
         branch(*this, xCoords, INT_VAR_MIN_MIN(), INT_VAL_MIN());
-        branch(*this, yCoords, INT_VAR_MIN_MIN(), INT_VAL_MAX());
+        branch(*this, yCoords, INT_VAR_MIN_MIN(), INT_VAL_MIN());
     }
 
     // Copy constructor
