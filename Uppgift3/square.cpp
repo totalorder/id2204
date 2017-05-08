@@ -121,8 +121,8 @@ public:
 
         //TODO write a good branching heuristic
         branch(*this, sizeOfSquare, INT_VAL_MIN());
-        branch(*this, xCoords, INT_VAR_MIN_MIN(), INT_VAL_MIN());
-        branch(*this, yCoords, INT_VAR_MIN_MIN(), INT_VAL_MIN());
+        branch(*this, xCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
+        branch(*this, yCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
     }
 
     // Copy constructor
@@ -140,9 +140,10 @@ public:
     /// Print solution
     virtual void
     print(std::ostream& os) const {
-        os << "x: " << xCoords << std::endl;
-        os << "y: " << xCoords << std::endl;
-        os << "s: " << sizeOfSquare << std::endl;
+        os << "x-coordinates: " << xCoords << std::endl;
+        os << "y-coordinates: " << yCoords << std::endl;
+        os << "size of enclosing square: " << sizeOfSquare << std::endl;
+        os << std::endl;
 //
 //        int *matrix = new int[sizeOfSquare.val() * sizeOfSquare.val()];
 //        int matrix[sizeOfSquare.val()][sizeOfSquare.val()];
