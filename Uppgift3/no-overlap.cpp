@@ -94,12 +94,20 @@ public:
     //
     // This is what YOU have to add!
     //
+
+    //TODO only one of these 2 conditions needs to be fulfilled, fix that somehow.
       for (int i = 0; i < x.size(); i++) {
         for (int j = i + 1; j < x.size(); j++) {
-          GECODE_ME_CHECK(x[i].val() + w[i] <= x[j].val());
-          GECODE_ME_CHECK(x[j].val() + w[j] <= x[i].val());
-          GECODE_ME_CHECK(y[i].val() + h[i] <= y[j].val());
-          GECODE_ME_CHECK(y[j].val() + h[j] <= y[i].val());
+          int x0 = x[i].val() + w[i];
+          GECODE_ME_CHECK(x[i].lq(home, x[j].val() - w[i]));
+          GECODE_ME_CHECK(x[j].lq(home, x[j].val() - w[j]));
+          GECODE_ME_CHECK(y[i].lq(home, y[j].val() - h[i]));
+          GECODE_ME_CHECK(y[j].lq(home, y[i].val() - h[j]));
+          //GECODE_ME_CHECK(x[i].val() + w[i] <= x[j].val());
+          //GECODE_ME_CHECK(x[j].val() + w[j] <= x[i].val());
+          //GECODE_ME_CHECK(y[i].val() + h[i] <= y[j].val());
+          //GECODE_ME_CHECK(y[j].val() + h[j] <= y[i].val());
+        //TODO fix check for subsumption
         }
       }
   }
