@@ -54,6 +54,50 @@ public:
         dom(*this, xCoords[0], 0, (int) (1 + std::floor((sizeOfSquare.max() -  size(0)) / 2)));
         rel(*this, yCoords[0] <= xCoords[0]);
 
+        // Remove forbidden gaps from borders due to dominance
+        for (int i = 0; i < N; i++) {
+            int s = size(i);
+            int forbiddenDistanceFromBorder = -1;
+            if (s == 45) {
+                forbiddenDistanceFromBorder = 10;
+            } else if (s >= 34) {
+                forbiddenDistanceFromBorder = 9;
+            } else if (s >= 30) {
+                forbiddenDistanceFromBorder = 8;
+            } else if (s >= 22) {
+                forbiddenDistanceFromBorder = 7;
+            } else if (s >= 18) {
+                forbiddenDistanceFromBorder = 6;
+            } else if (s >= 12) {
+                s = 5;
+            } else if (s >= 9) {
+                s = 4;
+            } else if (s >= 5) {
+                s = 3;
+            } else if (s >= 4) {
+                s = 2;
+            } else if (s >= 3) {
+                s = 2;
+                // Apply specific domain 2
+                rel(*this, xCoords[i], IRT_NQ, 3);
+                rel(*this, xCoords[i] + s + 3 != sizeOfSquare);
+                rel(*this, yCoords[i], IRT_NQ, 3);
+                rel(*this, yCoords[i] + s + 3 != sizeOfSquare);
+            } else if (s >= 2) {
+                s = 1;
+                // Apply specific domain 2
+                rel(*this, xCoords[i], IRT_NQ, 2);
+                rel(*this, xCoords[i] + s + 2 != sizeOfSquare);
+                rel(*this, yCoords[i], IRT_NQ, 2);
+                rel(*this, yCoords[i] + s + 3 != sizeOfSquare);
+            }
+
+            rel(*this, xCoords[i], IRT_NQ, forbiddenDistanceFromBorder);
+            rel(*this, xCoords[i] + s + forbiddenDistanceFromBorder != sizeOfSquare);
+            rel(*this, yCoords[i], IRT_NQ, forbiddenDistanceFromBorder);
+            rel(*this, yCoords[i] + s + forbiddenDistanceFromBorder != sizeOfSquare);
+        }
+
         // Constraint for non-overlapping squares.
         for (int square = 0; square < N; square++) {
             // Cannot overlap with any smaller squares
