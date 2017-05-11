@@ -48,8 +48,8 @@ public:
     Square(const SizeOptions &opt)
             : Script(opt),
               sizeOfSquare(*this, smallestSide(N), longestSide(N)),
-              xCoords(*this, N, 0, sizeOfSquare.max() - 1),
-              yCoords(*this, N, 0, sizeOfSquare.max() - 1) {
+              xCoords(*this, N - 1, 0, sizeOfSquare.max() - 1),
+              yCoords(*this, N - 1, 0, sizeOfSquare.max() - 1) {
 
         // Constraint for "lower-right corner" to make sure the squares fit.
         for (int i = 0; i < N - 1; i++) {
@@ -93,8 +93,8 @@ public:
             }
         }
 
-        IntArgs sizesOfSquares(N);
-        for (int i = 0; i < N; i++) {
+        IntArgs sizesOfSquares(N - 1);
+        for (int i = 0; i < N - 1; i++) {
             sizesOfSquares[i] = size(i);
         }
 
@@ -102,9 +102,8 @@ public:
             // Constraint for non-overlapping squares.
             no_overlap(*this, xCoords, sizesOfSquares, yCoords, sizesOfSquares);
         } else {
-
             // Constraint for non-overlapping squares.
-            for (int square = 0; square < N; square++) {
+            for (int square = 0; square < N - 1; square++) {
                 // Cannot overlap with any smaller squares
                 // Since larger squares have already been checked in the previous
                 // runs of the loop they are unnecessary to check again.
@@ -135,15 +134,17 @@ public:
                     rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square] == otherSquareTopOfSquare));
 
 
-                    rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare + squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
+                    rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare + squareLeftOfOtherSquare +
+                               otherSquareLeftOfSquare == 1);
+                }
             }
         }
 
         // TODO: Fix the column and row reified propagators described in #3 in instructions
         // Constraint for columns of x coordinates
         for (int outer = 0; outer < N - 1; outer++) {
-            BoolVarArgs reifiedRows(*this, N, 0, 1);
-            BoolVarArgs reifiedColumns(*this, N, 0, 1);
+            BoolVarArgs reifiedRows(*this, N - 1, 0, 1);
+            BoolVarArgs reifiedColumns(*this, N - 1, 0, 1);
 
             for (int inner = 0; inner < N - 1; inner++) {
                 // The x coordinate of all squares must be between
@@ -230,7 +231,7 @@ int main(int argc, char* argv[]) {
     opt.parse(argc,argv);
     opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR, "special",
                     "special no-overlap-propagator");
-    opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR);
+//    opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR);
 
     if (opt.size() < 1) {
         std::cerr << "Error: number of squares to place must be at least 1!"
