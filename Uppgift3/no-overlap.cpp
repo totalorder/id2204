@@ -89,27 +89,99 @@ public:
     return PropCost::quadratic(PropCost::LO,2*x.size());
   }
 
+  bool isOverlapping(int a, int u) {
+      bool isAssignedRightOfUnassigned = x[a].min() >= x[u].max() + w[u];
+      bool isAssignedLeftOfUnassigned = x[a].max() + w[a] <= x[u].min();
+      bool isAssignedUnderOfUnassigned = y[a].min() >= y[u].max() + h[u];
+      bool isAssignedOverOfUnassigned = y[a].max() + h[a] <= y[u].min();
+      bool isOverlappingHorizontally = !isAssignedRightOfUnassigned && !isAssignedLeftOfUnassigned;
+      bool isOverlappingVertically = !isAssignedUnderOfUnassigned && !isAssignedOverOfUnassigned;
+      return isOverlappingHorizontally && isOverlappingVertically;
+  }
+
   // Perform propagation
   virtual ExecStatus propagate(Space& home, const ModEventDelta&) {
-    //
-    // This is what YOU have to add!
-    //
-//    return ES_OK;
-    //TODO only one of these 2 conditions needs to be fulfilled, fix that somehow.
-      for (int i = 0; i < x.size(); i++) {
-        for (int j = i + 1; j < x.size(); j++) {
-          int x0 = x[i].val() + w[i];
-          GECODE_ME_CHECK(x[i].lq(home, x[j].val() - w[i]));
-          GECODE_ME_CHECK(x[j].lq(home, x[j].val() - w[j]));
-          GECODE_ME_CHECK(y[i].lq(home, y[j].val() - h[i]));
-          GECODE_ME_CHECK(y[j].lq(home, y[i].val() - h[j]));
-          //GECODE_ME_CHECK(x[i].val() + w[i] <= x[j].val());
-          //GECODE_ME_CHECK(x[j].val() + w[j] <= x[i].val());
-          //GECODE_ME_CHECK(y[i].val() + h[i] <= y[j].val());
-          //GECODE_ME_CHECK(y[j].val() + h[j] <= y[i].val());
-        //TODO fix check for subsumption
+    bool overlapFound = false;
+
+    for (int a = 0; a < x.size(); a++) {
+      for (int u = a + 1; u < x.size(); u++) {
+        if (isOverlapping(a, u)) {
+          overlapFound = true;
+        }
+
+        if(x[a].assigned() && y[a].assigned()) {
+          if (y[u].assigned()) {
+            bool isAssignedUnderOfUnassigned = y[a].val() >= y[u].val() + h[u];
+            bool isAssignedOverOfUnassigned = y[a].val() + h[a] <= y[u].val();
+            bool isOverlappingVertically = !isAssignedUnderOfUnassigned && !isAssignedOverOfUnassigned;
+            if (isOverlappingVertically) {
+              for (int i = x[a].val() - w[u] + 1; i < x[a].val() + w[a]; i++) {
+                GECODE_ME_CHECK(x[u].nq(home, i));
+              }
+            }
+          }
+
+          if (x[u].assigned()) {
+            bool isAssignedRightOfUnassigned = x[a].val() >= x[u].val() + w[u];
+            bool isAssignedLeftOfUnassigned = x[a].val() + w[a] <= x[u].val();
+            bool isOverlappingHorizontally = !isAssignedRightOfUnassigned && !isAssignedLeftOfUnassigned;
+            if (isOverlappingHorizontally) {
+              for (int i = y[a].val() - h[u] + 1; i < y[a].val() + h[a]; i++) {
+                GECODE_ME_CHECK(y[u].nq(home, i));
+              }
+            }
+          }
+        } else {
+//            return ES_FIX;
         }
       }
+    }
+
+    if (!overlapFound) {
+      return home.ES_SUBSUMED(*this);
+    }
+
+    return ES_FIX;
+
+//          GECODE_ME_CHECK(y[i].lq(home, y[j].val() - h[i]));
+//          GECODE_ME_CHECK(y[j].lq(home, y[i].val() - h[j]));
+    //GECODE_ME_CHECK(x[i].val() + w[i] <= x[j].val());
+    //GECODE_ME_CHECK(x[j].val() + w[j] <= x[i].val());
+    //GECODE_ME_CHECK(y[i].val() + h[i] <= y[j].val());
+    //GECODE_ME_CHECK(y[j].val() + h[j] <= y[i].val());
+    //TODO fix check for subsumption
+//          x[i] = 0, w[i] = 3
+//          x[j] = {0,1,2,3,4,5,6,7,8,9}, w[j] = 2
+//          x[j] <= 0 - 2 == -2 ... {}
+//          x[j] >= 0 + 3 == 3  ... {3,4,5,6,7,8,9}
+
+
+//          x[i] = 5, w[i] = 3
+//          x[j] = {0,1,2,3,4,5,6,7,8,9}, w[j] = 2
+//          x[j] <= 5 - 2 == 3 ... {0,1,2,3}
+//          x[j] >= 5 + 3 == 8  ... {8,9}
+
+    // x[j] must be left of x[i]
+//          x[i] = {0,1}, max = 1
+//          x[i] = 1,2
+//          x[j] = 5,6,7
+//          2 >= (1 + 2 == 3)
+    // The max(x[i]) must be smaller than
+//            bool isAssignedRightOfUnassigned = x[a].val() >= x[u].max() + w[u];
+//            bool isAssignedLeftOfUnassigned = x[a].val() + w[a] <= x[u].min();
+//            bool isAssignedUnderOfUnassigned = y[a].val() >= y[u].max() + h[u];
+//            bool isAssignedOverOfUnassigned = y[a].val() + h[a] <= y[u].min();
+//            bool isOverlappingHorizontally = !isAssignedRightOfUnassigned && !isAssignedLeftOfUnassigned;
+//            bool isOverlappingVertically = !isAssignedUnderOfUnassigned && !isAssignedOverOfUnassigned;
+//            bool isOverlapping = isOverlappingHorizontally && isOverlappingVertically;
+//
+
+//            GECODE_ME_CHECK(x[u].lq(home, x[a].val() - w[u]));
+
+    // x[j] must be right of x[i]
+//            GECODE_ME_CHECK(x[u].gq(home, x[a].val() + w[a]));
+//            GECODE_ME_CHECK(x[j].lq(home, x[j].val() - w[j]));
+      return ES_FIX;
   }
 
   // Dispose propagator and return its size

@@ -231,7 +231,7 @@ int main(int argc, char* argv[]) {
     opt.parse(argc,argv);
     opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR, "special",
                     "special no-overlap-propagator");
-//    opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR);
+    opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR);
 
     if (opt.size() < 1) {
         std::cerr << "Error: number of squares to place must be at least 1!"
