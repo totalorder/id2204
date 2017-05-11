@@ -52,7 +52,7 @@ public:
               yCoords(*this, N, 0, sizeOfSquare.max() - 1) {
 
         // Constraint for "lower-right corner" to make sure the squares fit.
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < N - 1; i++) {
 //            rel(*this, xCoords[i], IRT_LQ, sizeOfSquare.max() - size(i));
 //            rel(*this, yCoords[i], IRT_LQ, sizeOfSquare.max() - size(i));
             rel(*this, yCoords[i] <= sizeOfSquare - size(i));
@@ -64,7 +64,7 @@ public:
         rel(*this, yCoords[0] <= xCoords[0]);
 
         // Remove forbidden gaps from borders due to dominance
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < N - 1; i++) {
             int s = size(i);
             if (s == 45) {
                 forbidDistanceFromBorder(i, 10);
@@ -108,7 +108,7 @@ public:
                 // Cannot overlap with any smaller squares
                 // Since larger squares have already been checked in the previous
                 // runs of the loop they are unnecessary to check again.
-                for (int otherSquare = square + 1; otherSquare < N; otherSquare++) {
+                for (int otherSquare = square + 1; otherSquare < N - 1; otherSquare++) {
                     BoolVar squareLeftOfOtherSquare(*this, 0, 1);
                     BoolVar otherSquareLeftOfSquare(*this, 0, 1);
 
@@ -135,21 +135,17 @@ public:
                     rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square] == otherSquareTopOfSquare));
 
 
-                    rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare + squareLeftOfOtherSquare +
-                               otherSquareLeftOfSquare == 1);
-                }
+                    rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare + squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
             }
         }
 
-
-
         // TODO: Fix the column and row reified propagators described in #3 in instructions
         // Constraint for columns of x coordinates
-        for (int outer = 0; outer < N; outer++) {
+        for (int outer = 0; outer < N - 1; outer++) {
             BoolVarArgs reifiedRows(*this, N, 0, 1);
             BoolVarArgs reifiedColumns(*this, N, 0, 1);
 
-            for (int inner = 0; inner < N; inner++) {
+            for (int inner = 0; inner < N - 1; inner++) {
                 // The x coordinate of all squares must be between
                 // the column index - size of square + 1 and column index
                 // xCoords[inner] must be less than outer-(n-inner)+1 and bigger than outer
@@ -205,7 +201,7 @@ public:
             }
         }
 
-        for (int square = 0; square < N; square++) {
+        for (int square = 0; square < N - 1; square++) {
             for (int row = yCoords[square].val(); row < yCoords[square].val() + size(square); row++) {
                 for (int column = xCoords[square].val(); column < xCoords[square].val() + size(square); column++) {
                     matrix[row][column] = square;
