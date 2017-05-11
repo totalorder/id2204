@@ -32,3 +32,4 @@ set(LIBRARIES
 
 target_link_libraries(Uppgift3 ${LIBRARIES})
 target_link_libraries(square ${LIBRARIES})
+target_link_libraries(no-overlap ${LIBRARIES})

@@ -94,7 +94,7 @@ public:
     //
     // This is what YOU have to add!
     //
-
+//    return ES_OK;
     //TODO only one of these 2 conditions needs to be fulfilled, fix that somehow.
       for (int i = 0; i < x.size(); i++) {
         for (int j = i + 1; j < x.size(); j++) {
@@ -128,7 +128,7 @@ public:
  * This is the function that you will call from your model. The best
  * is to paste the entire file into your model.
  */
-void nooverlap(Home home, 
+void no_overlap(Home home,
                const IntVarArgs& x, const IntArgs& w,
                const IntVarArgs& y, const IntArgs& h) {
   // Check whether the arguments make sense
@@ -150,4 +150,3 @@ void nooverlap(Home home,
   if (NoOverlap::post(home,vx,wc,vy,hc) != ES_OK)
     home.fail();
 }
-

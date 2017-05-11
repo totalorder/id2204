@@ -1,6 +1,5 @@
 #include <gecode/driver.hh>
-//#include <gecode/int.hh>
-//#include <gecode/minimodel.hh>
+#include "no-overlap.cpp"
 
 using namespace Gecode;
 
@@ -15,6 +14,11 @@ protected:
     // the y-coordinates for the packed squares
     IntVarArray yCoords;
 public:
+    /// Propagation to use for model
+    enum {
+        PROP_DEFAULT, /// Use default propagation
+        PROP_SPECIAL_NO_OVERLAP_PROPAGATOR,   /// Use special no-overlap propagator
+    };
 
     // Hardcoded number of squares
     static const int size(int i) {
@@ -89,45 +93,55 @@ public:
             }
         }
 
-        // Constraint for non-overlapping squares.
-        for (int square = 0; square < N; square++) {
-            // Cannot overlap with any smaller squares
-            // Since larger squares have already been checked in the previous
-            // runs of the loop they are unnecessary to check again.
-            for (int otherSquare = square + 1; otherSquare < N; otherSquare++) {
-                BoolVar squareLeftOfOtherSquare(*this, 0, 1);
-                BoolVar otherSquareLeftOfSquare(*this, 0, 1);
-
-                BoolVar squareTopOfOtherSquare(*this, 0, 1);
-                BoolVar otherSquareTopOfSquare(*this, 0, 1);
-//                BoolVar square(*this, 0, 1);
-                // The right edge of square must be left of the left edge of otherSquare
-                rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]) == squareLeftOfOtherSquare);
-//                rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]));
-
-                // The right edge of otherSquare must be left of the left edge of square
-//                rel(*this, (xCoords[otherSquare] + size(otherSquare) <= xCoords[square]));
-                rel(*this, (xCoords[otherSquare] + size(otherSquare) <= xCoords[square] == otherSquareLeftOfSquare));
-
-//                rel(*this, squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
-
-                // The bottom edge of square  must be above the top edge of otherSquare
-//                rel(*this, (yCoords[square] + size(square) <= yCoords[otherSquare]));
-                rel(*this, (yCoords[square] + size(square) <= yCoords[otherSquare]) == squareTopOfOtherSquare);
-
-                // The bottom edge of otherSquare must be above the top edge of square
-//                rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square]));
-                rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square] == otherSquareTopOfSquare));
-
-
-                rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare + squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
-            }
-        }
-
         IntArgs sizesOfSquares(N);
         for (int i = 0; i < N; i++) {
             sizesOfSquares[i] = size(i);
         }
+
+        if (opt.propagation() == PROP_SPECIAL_NO_OVERLAP_PROPAGATOR) {
+            // Constraint for non-overlapping squares.
+            no_overlap(*this, xCoords, sizesOfSquares, yCoords, sizesOfSquares);
+        } else {
+
+            // Constraint for non-overlapping squares.
+            for (int square = 0; square < N; square++) {
+                // Cannot overlap with any smaller squares
+                // Since larger squares have already been checked in the previous
+                // runs of the loop they are unnecessary to check again.
+                for (int otherSquare = square + 1; otherSquare < N; otherSquare++) {
+                    BoolVar squareLeftOfOtherSquare(*this, 0, 1);
+                    BoolVar otherSquareLeftOfSquare(*this, 0, 1);
+
+                    BoolVar squareTopOfOtherSquare(*this, 0, 1);
+                    BoolVar otherSquareTopOfSquare(*this, 0, 1);
+                    //                BoolVar square(*this, 0, 1);
+                    // The right edge of square must be left of the left edge of otherSquare
+                    rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]) == squareLeftOfOtherSquare);
+                    //                rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]));
+
+                    // The right edge of otherSquare must be left of the left edge of square
+                    //                rel(*this, (xCoords[otherSquare] + size(otherSquare) <= xCoords[square]));
+                    rel(*this,
+                        (xCoords[otherSquare] + size(otherSquare) <= xCoords[square] == otherSquareLeftOfSquare));
+
+                    //                rel(*this, squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
+
+                    // The bottom edge of square  must be above the top edge of otherSquare
+                    //                rel(*this, (yCoords[square] + size(square) <= yCoords[otherSquare]));
+                    rel(*this, (yCoords[square] + size(square) <= yCoords[otherSquare]) == squareTopOfOtherSquare);
+
+                    // The bottom edge of otherSquare must be above the top edge of square
+                    //                rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square]));
+                    rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square] == otherSquareTopOfSquare));
+
+
+                    rel(*this, squareTopOfOtherSquare + otherSquareTopOfSquare + squareLeftOfOtherSquare +
+                               otherSquareLeftOfSquare == 1);
+                }
+            }
+        }
+
+
 
         // TODO: Fix the column and row reified propagators described in #3 in instructions
         // Constraint for columns of x coordinates
@@ -185,7 +199,6 @@ public:
 //        int matrix[][] = malloc(sizeOfSquare.val() * sizeOfSquare.val());
         int matrix[15][15];
 
-
         for (int row = 0; row < sizeOfSquare.val(); row++) {
             for (int column = 0; column < sizeOfSquare.val(); column++) {
                 matrix[row][column] = -1;
@@ -219,6 +232,10 @@ int main(int argc, char* argv[]) {
     opt.ipl(IPL_DOM);
     opt.solutions(1);
     opt.parse(argc,argv);
+    opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR, "special",
+                    "special no-overlap-propagator");
+    opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR);
+
     if (opt.size() < 1) {
         std::cerr << "Error: number of squares to place must be at least 1!"
                   << std::endl;
