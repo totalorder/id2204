@@ -26,8 +26,6 @@ public:
     }
 
     int smallestSide(int n) {
-        // s = lambda n: math.floor(math.sqrt((n*(n-1))*(2*n+1)/6))
-        // q = lambda n: math.floor(math.sqrt(sum(n*n for n in range(n+1))))
         int sumOfSquares = 0;
         for (int i = 1; i < n + 1; i++) {
             sumOfSquares += i * i;
@@ -53,8 +51,6 @@ public:
 
         // Constraint for "lower-right corner" to make sure the squares fit.
         for (int i = 0; i < N - 1; i++) {
-//            rel(*this, xCoords[i], IRT_LQ, sizeOfSquare.max() - size(i));
-//            rel(*this, yCoords[i], IRT_LQ, sizeOfSquare.max() - size(i));
             rel(*this, yCoords[i] <= sizeOfSquare - size(i));
             rel(*this, xCoords[i] <= sizeOfSquare - size(i));
         }
@@ -113,24 +109,17 @@ public:
 
                     BoolVar squareTopOfOtherSquare(*this, 0, 1);
                     BoolVar otherSquareTopOfSquare(*this, 0, 1);
-                    //                BoolVar square(*this, 0, 1);
                     // The right edge of square must be left of the left edge of otherSquare
                     rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]) == squareLeftOfOtherSquare);
-                    //                rel(*this, (xCoords[square] + size(square) <= xCoords[otherSquare]));
 
                     // The right edge of otherSquare must be left of the left edge of square
-                    //                rel(*this, (xCoords[otherSquare] + size(otherSquare) <= xCoords[square]));
                     rel(*this,
                         (xCoords[otherSquare] + size(otherSquare) <= xCoords[square] == otherSquareLeftOfSquare));
 
-                    //                rel(*this, squareLeftOfOtherSquare + otherSquareLeftOfSquare == 1);
-
                     // The bottom edge of square  must be above the top edge of otherSquare
-                    //                rel(*this, (yCoords[square] + size(square) <= yCoords[otherSquare]));
                     rel(*this, (yCoords[square] + size(square) <= yCoords[otherSquare]) == squareTopOfOtherSquare);
 
                     // The bottom edge of otherSquare must be above the top edge of square
-                    //                rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square]));
                     rel(*this, (yCoords[otherSquare] + size(otherSquare) <= yCoords[square] == otherSquareTopOfSquare));
 
 
@@ -140,7 +129,6 @@ public:
             }
         }
 
-        // TODO: Fix the column and row reified propagators described in #3 in instructions
         // Constraint for columns of x coordinates
         for (int outer = 0; outer < N - 1; outer++) {
             BoolVarArgs reifiedRows(*this, N - 1, 0, 1);
@@ -149,23 +137,20 @@ public:
             for (int inner = 0; inner < N - 1; inner++) {
                 // The x coordinate of all squares must be between
                 // the column index - size of square + 1 and column index
-                // xCoords[inner] must be less than outer-(n-inner)+1 and bigger than outer
                 dom(*this, xCoords[inner], outer - size(inner) + 1, outer, reifiedRows[inner]);
-//                rowsSquareSizes[inner] = xCoords[inner];
 
                 // The y coordinate of all squares must be between
                 // the row index - size of square + 1 and row index
                 dom(*this, yCoords[inner], outer - size(inner) + 1, outer, reifiedColumns[inner]);
             }
 
-            //the sum of the products of sizesOfSquares[i] and reifiedColumns[i] must be less than or equal to the size of the enclosing square.
+            // The sum of the products of sizesOfSquares[i] and reifiedColumns[i] must be less than or equal to the size of the enclosing square.
             linear(*this, sizesOfSquares, reifiedColumns, IRT_LQ, sizeOfSquare);
 
-            //the sum of the products of sizesOfSquares[i] and reifiedRows[i] must be less than or equal to the size of the enclosing square.
+            // The sum of the products of sizesOfSquares[i] and reifiedRows[i] must be less than or equal to the size of the enclosing square.
             linear(*this, sizesOfSquares, reifiedRows, IRT_LQ, sizeOfSquare);
         }
 
-        //TODO write a good branching heuristic
         branch(*this, sizeOfSquare, INT_VAL_MIN());
         branch(*this, xCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
         branch(*this, yCoords, INT_VAR_MIN_MAX(), INT_VAL_MIN());
@@ -190,11 +175,8 @@ public:
         os << "y-coordinates: " << yCoords << std::endl;
         os << "size of enclosing square: " << sizeOfSquare << std::endl;
         os << std::endl;
-//
-//        int *matrix = new int[sizeOfSquare.val() * sizeOfSquare.val()];
-//        int matrix[sizeOfSquare.val()][sizeOfSquare.val()];
-//        int matrix[][] = malloc(sizeOfSquare.val() * sizeOfSquare.val());
-        int matrix[15][15];
+
+        int matrix[64][64];
 
         for (int row = 0; row < sizeOfSquare.val(); row++) {
             for (int column = 0; column < sizeOfSquare.val(); column++) {
@@ -225,19 +207,12 @@ public:
 
 int main(int argc, char* argv[]) {
     SizeOptions opt("Square");
-    opt.size(5);
     opt.ipl(IPL_DOM);
     opt.solutions(1);
     opt.parse(argc,argv);
     opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR, "special",
                     "special no-overlap-propagator");
     opt.propagation(Square::PROP_SPECIAL_NO_OVERLAP_PROPAGATOR);
-
-    if (opt.size() < 1) {
-        std::cerr << "Error: number of squares to place must be at least 1!"
-                  << std::endl;
-        return 1;
-    }
 
     Script::run<Square, DFS, SizeOptions>(opt);
 }
